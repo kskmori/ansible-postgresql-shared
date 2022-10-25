@@ -32,6 +32,8 @@
       - postgresql{{ pg_major }}-docs-{{ pg_rev }}.rhel8.x86_64.rpm
       - postgresql{{ pg_major }}-contrib-{{ pg_rev }}.rhel8.x86_64.rpm
   register: rc_copy
+  retries: 5
+  until: rc_copy is not failed
 
 - name: install PostgreSQL packages
   yum:
@@ -39,6 +41,9 @@
     update_cache: yes
     disable_gpg_check: True
     state: present
+  register: rc_yum
+  retries: 5
+  until: rc_yum is not failed
   with_items: "{{ rc_copy.results }}"
   loop_control:
     label: "{{ item.dest | default(item.path) }}" # to suppress too verbose logs
